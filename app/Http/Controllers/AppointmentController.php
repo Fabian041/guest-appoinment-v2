@@ -31,7 +31,7 @@ class AppointmentController extends Controller
     {
 
         $pic = User::select('occupation')->where('id',$request->pic_id)->first();
-        
+
         $request->validate([
             'nama' => 'required',
             'purpose-1' => 'required_without_all:purpose-2,purpose-3,purpose-4',
@@ -83,7 +83,8 @@ class AppointmentController extends Controller
         }else{
             $pic_approval = 'pending';
         }
-
+        try{
+        DB::beginTransaction();
         $appointment = Appointment::create([
             'name' => $request->nama,
             'purpose' => $purpose,
@@ -112,27 +113,35 @@ class AppointmentController extends Controller
             'booking_date' => $request->date,
             'booking_time' => $request->time
         ]);
-        
+        DB::commit();
+        }
+        catch(\Exception $e)
+        {
+            DB::rollback();
+        }
+
         return redirect()->route('appointment.history')->with('success', 'Your ticket has been successfully created! Please wait for the PIC to approve your ticket or Contact the PIC');
     }
-    
-    public function history()
+
+    public function history(\App\Models\Appointment $appointment)
     {
         if(auth()->user()->role === 'visitor')
         {
             $appointments = Appointment::latest()->where('user_id', auth()->user()->id)->get();
-    
+            //get the pic name laravel 5
+            $appointments->load('pic')->toArray();
+
             return view('pages.visitor.history',[
                 'appointments' => $appointments,
             ]);
         }
-        
+
     }
 
     public function getPic(Request $request)
     {
         // get all pic where dept_id is dept
-        $pic = User::where('department_id', $request->dept)->get();
+        $pic = User::select('name','id')->where('department_id', $request->dept)->get();
 
         return $pic;
     }
@@ -142,8 +151,12 @@ class AppointmentController extends Controller
         $date = $request->date;
 
         // get booked rooms
-        $roomBooked = Room::whereRaw("id NOT IN (SELECT room_id FROM room_details WHERE booking_date = '$date')")->get();
-        
+        $roomBooked = Room::whereNotIn('id', function($query) use ($date) {
+            $query->select('room_id')
+                ->from('room_details')
+                ->where('booking_date', $date);
+        })->get();
+
         return $roomBooked;
     }
 

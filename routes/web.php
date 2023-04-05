@@ -26,29 +26,29 @@ Route::post('/logout-auth', 'Auth\LoginController@logout')->name('logout.auth');
 
 // guest route
 Route::middleware(['guest'])->group(function () {
-    
+
     Route::get('/register', 'Auth\RegisterController@index')->name('register.index');
     Route::post('/register-store', 'Auth\RegisterController@store')->name('register.store');
 
-    
+
     Route::get('/login', 'Auth\LoginController@index')->name('login');
     Route::post('/login-auth', 'Auth\LoginController@authenticate')->name('login.auth');
 });
 
 // auth route
 Route::middleware(['auth'])->group(function () {
-    
+
     Route::get('/dashboard', 'DashboardController@index')->name('dashboard.index');
     Route::get('/update-password', 'UpdatePasswordController@index')->name('password.index');
     Route::post('/update-password/update', 'UpdatePasswordController@update')->name('password.update');
-    
+
     // visitor (create,history)
     Route::get('/appointment', 'AppointmentController@index')->name('appointment.index');
     Route::post('/appointment/create-ticket', 'AppointmentController@create')->name('appointment.create');
     Route::get('/appointment/history', 'AppointmentController@history')->name('appointment.history');
     Route::get('/get-pic', 'AppointmentController@getPic')->name('appointment.getPic');
     Route::get('/get-room', 'AppointmentController@getRoom')->name('appointment.getRoom');
-    
+
     // approver (approve, history)
     Route::get('/approval', 'ApprovalController@index')->name('ticket.index');
     Route::get('/approval/history', 'ApprovalController@history')->name('ticket.history');
@@ -59,10 +59,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/appointment/export-appointment', 'AppointmentController@export')->name('appointment.export');
     Route::get('/qrScanView', 'ApprovalController@qrScanView')->name('qrScanView.index');
     Route::post('/qrScan', 'ApprovalController@qrScan')->name('qrScan.index');
-    
+
     // GA
     Route::post('/facility-done/{facility}', 'ApprovalController@facilityDone')->name('facility.done');
 
     // logout
-    Route::post('/logout-auth', 'Auth\LoginController@logout')->name('logout.auth');    
+    Route::post('/logout-auth', 'Auth\LoginController@logout')->name('logout.auth');
 });
