@@ -81,7 +81,7 @@ class DashboardController extends Controller
             ->select('appointments.*', 'facility_details.status as facility_status')
             ->leftJoin('facility_details', 'appointments.id', '=', 'facility_details.appointment_id')
             ->where('pic_approval', 'approved')
-
+            ->where('date', $current_date)
             ->where('dh_approval', 'approved')
             ->where('pic_dept', $user_dept);
 

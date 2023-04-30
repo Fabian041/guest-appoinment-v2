@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\ApprovalHistory;
+//use db
+use Illuminate\Support\Facades\DB;
 use App\User;
 use App\Checkin;
 use App\FacilityDetail;
 use Carbon\Carbon;
 use App\Models\Appointment;
+use App\RoomDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -68,8 +71,8 @@ class ApprovalController extends Controller
         } else {
             $appointments->where('pic_id', $userId);
         }
-                // load facility_detail
-                $appointments->get()->load('facility_detail');
+        // load facility_detail
+        $appointments->get()->load('facility_detail');
 
         return view('pages.admin.history', [
             'appointments' => $appointments->get(),
@@ -80,41 +83,67 @@ class ApprovalController extends Controller
     public function ticketApproval(Request $request, Appointment $ticket)
     {
         $user = User::select('occupation')->where('id', $ticket->pic_id)->first();
+        if ($request->room) {
 
+            try {
+                $rd = RoomDetail::where('appointment_id', $ticket->id)->first();
+                $appt = Appointment::where('id', $ticket->id)->first();
+                DB::beginTransaction();
+                RoomDetail::updateOrCreate([
+                    'appointment_id' => $appt->id
+                ], [
+                    'room_id' => $request->room,
+                    'booking_date' => $appt->date,
+                    'booking_time' => $appt->time,
+                ]);
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('error', 'Something went wrong');
+            }
+        }
         // if the pic of the ticket is spv down and the auth user is spv (the pic itself) then show the facility button modal
         // then only update the pic_appproval field
         if ($user->occupation == 1 && auth()->user()->occupation == 1) {
             Appointment::where('id', $ticket->id)->update([
                 'pic_approval' => 'approved'
             ]);
+            try {
+                DB::beginTransaction();
+                FacilityDetail::create([
+                    'snack_kering' => $request->get('dry-food-quantity'),
+                    'snack_basah' => $request->get('wet-food-quantity'),
+                    'makan_siang' => $request->get('lunch-quantity'),
+                    'permen' => $request->get('candy-quantity'),
+                    'kopi' => $request->get('coffee-quantity'),
+                    'teh' => $request->get('tea-quantity'),
+                    'soft_drink' => $request->get('soft-drink-quantity'),
+                    'air_mineral' => $request->get('mineral-water-quantity'),
+                    'helm' => $request->get('helm-quantity'),
+                    'handuk' => $request->get('handuk-quantity'),
+                    'speaker' => $request->get('speaker-quantity'),
+                    'speaker_wireless' => $request->get('speaker-wireless-quantity'),
+                    'mobil' => $request->get('mobil-quantity'),
+                    'motor' => $request->get('motor-quantity'),
+                    'mini_bus' => $request->get('mini-bus-quantity'),
+                    'bus' => $request->get('bus-quantity'),
+                    'other' => $request->get('other-value'),
+                    'appointment_id' => $ticket->id
+                ]);
 
-            FacilityDetail::create([
-                'snack_kering' => $request->get('dry-food-quantity'),
-                'snack_basah' => $request->get('wet-food-quantity'),
-                'makan_siang' => $request->get('lunch-quantity'),
-                'permen' => $request->get('candy-quantity'),
-                'kopi' => $request->get('coffee-quantity'),
-                'teh' => $request->get('tea-quantity'),
-                'soft_drink' => $request->get('soft-drink-quantity'),
-                'air_mineral' => $request->get('mineral-water-quantity'),
-                'helm' => $request->get('helm-quantity'),
-                'handuk' => $request->get('handuk-quantity'),
-                'speaker' => $request->get('speaker-quantity'),
-                'speaker_wireless' => $request->get('speaker-wireless-quantity'),
-                'mobil' => $request->get('mobil-quantity'),
-                'motor' => $request->get('motor-quantity'),
-                'mini_bus' => $request->get('mini-bus-quantity'),
-                'bus' => $request->get('bus-quantity'),
-                'other' => $request->get('other-value'),
-                'appointment_id' => $ticket->id
-            ]);
+                // create or update approval history
+                ApprovalHistory::create([
+                    'signed_by' => auth()->user()->id,
+                    'appointment_id' =>  $ticket->id,
+                    'status' => 'PIC approved'
+                ]);
 
-            // create or update approval history
-            ApprovalHistory::create([
-                'signed_by' => auth()->user()->id,
-                'appointment_id' =>  $ticket->id,
-                'status' => 'PIC approved'
-            ]);
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('error', 'Something went wrong');
+            }
+
             // if the pic of ticket is spv down (1) and the auth user is manager up, then show the approval button modal and only update the dh_approval because the pic_approval already approved, because the ticket is appear when already approved by the pic , when the ticket not approved yet by the pic, the ticket should not appear in the list
         } elseif ($user->occupation == 1 && auth()->user()->occupation == 2) {
             Appointment::where('id', $ticket->id)->update([
@@ -134,34 +163,41 @@ class ApprovalController extends Controller
                 'dh_approval' => 'approved'
             ]);
 
-            FacilityDetail::create([
-                'snack_kering' => $request->get('dry-food-quantity'),
-                'snack_basah' => $request->get('wet-food-quantity'),
-                'makan_siang' => $request->get('lunch-quantity'),
-                'permen' => $request->get('candy-quantity'),
-                'kopi' => $request->get('coffee-quantity'),
-                'teh' => $request->get('tea-quantity'),
-                'soft_drink' => $request->get('soft-drink-quantity'),
-                'air_mineral' => $request->get('mineral-water-quantity'),
-                'helm' => $request->get('helm-quantity'),
-                'handuk' => $request->get('handuk-quantity'),
-                'speaker' => $request->get('speaker-quantity'),
-                'speaker_wireless' => $request->get('speaker-wireless-quantity'),
-                'mobil' => $request->get('mobil-quantity'),
-                'motor' => $request->get('motor-quantity'),
-                'mini_bus' => $request->get('mini-bus-quantity'),
-                'bus' => $request->get('bus-quantity'),
-                'other'=> $request->get('other-value'),
-                'appointment_id' => $ticket->id
-            ]);
 
-            ApprovalHistory::create([
-                'signed_by' => auth()->user()->id,
-                'appointment_id' =>  $ticket->id,
-                'status' => 'Dept Head approved'
-            ]);
+            try {
+                DB::beginTransaction();
+                FacilityDetail::create([
+                    'snack_kering' => $request->get('dry-food-quantity'),
+                    'snack_basah' => $request->get('wet-food-quantity'),
+                    'makan_siang' => $request->get('lunch-quantity'),
+                    'permen' => $request->get('candy-quantity'),
+                    'kopi' => $request->get('coffee-quantity'),
+                    'teh' => $request->get('tea-quantity'),
+                    'soft_drink' => $request->get('soft-drink-quantity'),
+                    'air_mineral' => $request->get('mineral-water-quantity'),
+                    'helm' => $request->get('helm-quantity'),
+                    'handuk' => $request->get('handuk-quantity'),
+                    'speaker' => $request->get('speaker-quantity'),
+                    'speaker_wireless' => $request->get('speaker-wireless-quantity'),
+                    'mobil' => $request->get('mobil-quantity'),
+                    'motor' => $request->get('motor-quantity'),
+                    'mini_bus' => $request->get('mini-bus-quantity'),
+                    'bus' => $request->get('bus-quantity'),
+                    'other' => $request->get('other-value'),
+                    'appointment_id' => $ticket->id
+                ]);
+
+                ApprovalHistory::create([
+                    'signed_by' => auth()->user()->id,
+                    'appointment_id' =>  $ticket->id,
+                    'status' => 'Dept Head approved'
+                ]);
+                DB::commit();
+            } catch (\Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('error', 'Something went wrong');
+            }
         }
-
 
         return redirect()->back()->with('approved', 'Ticket has been approved!');
     }

@@ -41,7 +41,6 @@ class AppointmentController extends Controller
             'date' => 'required',
             'time' => 'required',
             'jumlahTamu' => 'required',
-            'room' => '',
             'pic_id' => 'required',
             'pic_dept' => 'required',
         ]);
@@ -107,12 +106,12 @@ class AppointmentController extends Controller
         ]);
 
         // create rooms detail data immedietly
-        RoomDetail::create([
+/*         RoomDetail::create([
             'appointment_id' => $appointment->id,
             'room_id' => $request->room,
             'booking_date' => $request->date,
             'booking_time' => $request->time
-        ]);
+        ]); */
         DB::commit();
         }
         catch(\Exception $e)

@@ -72,7 +72,8 @@
                                                 {{-- if the pic of the ticket is spv down and the auth user is spv (the pic itself) then show the facility button modal --}}
                                             @elseif($appointment->pic->occupation == 1 && auth()->user()->occupation == 1)
                                                 <button data-toggle="modal"
-                                                    data-target="#facilityModal-{{ $appointment->id }}" type="submit"
+                                                    data-target="#facilityModal-{{ $appointment->id }}"
+                                                    onclick="getRoom({{ $appointment->id }})" type="submit"
                                                     class="btn btn-icons btn-inverse-success" data-toggle="tooltip"
                                                     title="Approve">
                                                     <i class="mdi mdi-check-circle"></i>
@@ -80,7 +81,8 @@
                                                 {{-- if the pic of the ticket is manager up and the auth user is manager (the pic itself) then show the facility button modal --}}
                                             @elseif($appointment->pic->occupation == 2 && auth()->user()->occupation == 2)
                                                 <button data-toggle="modal"
-                                                    data-target="#facilityModal-{{ $appointment->id }}" type="submit"
+                                                    data-target="#facilityModal-{{ $appointment->id }}"
+                                                    onclick="getRoom({{ $appointment->id }})" type="submit"
                                                     class="btn btn-icons btn-inverse-success" data-toggle="tooltip"
                                                     title="Approve">
                                                     <i class="mdi mdi-check-circle"></i>
@@ -187,25 +189,27 @@
                                                         <div class="connecting-line"></div>
                                                         <ul class="nav nav-tabs pr-3" role="tablist">
                                                             <li role="presentation" class="active">
-                                                                <a href="#step1-non" data-toggle="tab" aria-controls="step1-non"
-                                                                    role="tab" aria-expanded="true"><span
-                                                                        class="round-tab">1 </span> <i
-                                                                        class="pl-4">Makanan</i></a>
+                                                                <a href="#step1-non" data-toggle="tab"
+                                                                    aria-controls="step1-non" role="tab"
+                                                                    aria-expanded="true"><span class="round-tab">1 </span>
+                                                                    <i class="pl-4">Makanan</i></a>
                                                             </li>
                                                             <li role="presentation" class="disabled">
-                                                                <a href="#step2-non" data-toggle="tab" aria-controls="step2-non"
-                                                                    role="tab" aria-expanded="false"><span
-                                                                        class="round-tab">2</span> <i
-                                                                        class="pl-4">Minuman</i></a>
+                                                                <a href="#step2-non" data-toggle="tab"
+                                                                    aria-controls="step2-non" role="tab"
+                                                                    aria-expanded="false"><span class="round-tab">2</span>
+                                                                    <i class="pl-4">Minuman</i></a>
                                                             </li>
                                                             <li role="presentation" class="disabled">
-                                                                <a href="#step3-non" data-toggle="tab" aria-controls="step3-non"
-                                                                    role="tab"><span class="round-tab">3</span> <i
-                                                                        class="pl-4">Plan Tour</i></a>
+                                                                <a href="#step3-non" data-toggle="tab"
+                                                                    aria-controls="step3-non" role="tab"><span
+                                                                        class="round-tab">3</span> <i class="pl-4">Plan
+                                                                        Tour</i></a>
                                                             </li>
                                                             <li role="presentation" class="disabled">
-                                                                <a href="#step4-non" data-toggle="tab" aria-controls="step4-non"
-                                                                    role="tab"><span class="round-tab">4</span> <i
+                                                                <a href="#step4-non" data-toggle="tab"
+                                                                    aria-controls="step4-non" role="tab"><span
+                                                                        class="round-tab">4</span> <i
                                                                         class="pl-4">Parkir</i></a>
                                                             </li>
 
@@ -382,12 +386,13 @@
                                         </div>
                                         <div class="mx-4 mt-2">
                                             <div>Other :</div>
-                                            <div>{{ $appointment->facility_detail != null? $appointment->facility_detail->other : '' }}</div>
+                                            <div>
+                                                {{ $appointment->facility_detail != null ? $appointment->facility_detail->other : '' }}
+                                            </div>
                                         </div>
                                         <div class="text-center mt-5">
                                             <a class="btn btn-primary py-3"
-                                                href="{{ asset('uploads/doc/' . $appointment->doc) }}"
-                                                download="">
+                                                href="{{ asset('uploads/doc/' . $appointment->doc) }}" download="">
                                                 <i class="mdi mdi-cloud-check pr-2"></i>Download Document
                                             </a>
                                         </div>
@@ -711,7 +716,9 @@
                                             </div>
                                             <div class="mx-4 mt-2">
                                                 <div>Other :</div>
-                                                <div><textarea name="other-value"  class="form-control" rows="3">{{ $appointment->facility_detail != null  ? $appointment->facility_detail->other : '  ' }}</textarea></div>
+                                                <div>
+                                                    <textarea name="other-value" class="form-control" rows="3">{{ $appointment->facility_detail != null ? $appointment->facility_detail->other : '  ' }}</textarea>
+                                                </div>
                                             </div>
                                         @else
                                             <div class="row d-flex justify-content-center my-5">
@@ -719,7 +726,19 @@
                                                 </p>
                                             </div>
                                         @endif
-
+                                        <div class="container">
+                                            <div class="form-group row">
+                                                <div class="col-md-4">
+                                                    <label for="inputEmail3" class="col-form-label">Select Room <small
+                                                            class="text-muted pl-0">/ Pilih Ruangan / 部屋を選択</small></label>
+                                                </div>
+                                                <div class="col-md-8">
+                                                    <select class="form-control mt-1" id="room-{{$appointment->id}}" name="room">
+                                                        <option value="null" selected>-- Select Room --</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-primary">Submit & Approve</button>
                                             <button type="button" class="btn btn-secondary"
@@ -785,6 +804,30 @@
     <script src="https://cdn.datatables.net/1.13.1/js/dataTables.bootstrap4.min.js"></script>
 
     <script>
+        function getRoom(id) {
+            const currentDate = new Date();
+            const year = currentDate.getFullYear();
+            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            const day = currentDate.getDate().toString().padStart(2, '0');
+
+            $.ajax({
+                url: '/get-room',
+                type: 'GET',
+                data: {
+                    date: `${year}-${month}-${day}`,
+                },
+                success: function(room) {
+
+                    $('#room-' + id).empty();
+                    $('#room-' + id).append(`<option value='null'>-- Select Room --</option>`);
+                    $.each(room, function(key, value) {
+                        $('#room-' + id).append(`<option value='${value.id}'> ${value.name}</option>`);
+                    });
+
+                }
+            });
+
+        }
         $(document).ready(function() {
 
             $(function() {

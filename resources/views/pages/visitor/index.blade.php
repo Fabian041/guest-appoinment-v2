@@ -10,7 +10,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title mb-5">Create Ticket <small class="text-muted pl-0">/ Buat Tiket / チケットを作る</small></h4>
-                
+
                 <form action="{{ route('appointment.create') }}" method="POST" enctype="multipart/form-data" id="appointmentForm">
                     {{ csrf_field() }}
                     <div class="form-group row">
@@ -22,7 +22,7 @@
                             <input type="text" class="form-control mt-2" id="nama" name="nama" placeholder="Insert Name..." value="{{ auth()->user()->name }}" disabled>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Visit Purpose <small class="text-muted pl-0">/ Tujuan Kunjungan / 滞在目的</small></label></label>
@@ -31,10 +31,10 @@
                             <div class="boxes">
                                 <input type="checkbox" id="purpose-1" name="purpose-1">
                                 <label for="purpose-1">Company Visit</label>
-                                
+
                                 <input type="checkbox" id="purpose-2" name="purpose-2">
                                 <label for="purpose-2">Benchmarking</label>
-                                
+
                                 <input type="checkbox" id="purpose-3" name="purpose-3">
                                 <label for="purpose-3">Trial</label>
 
@@ -47,7 +47,7 @@
                                 Select one or more</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Select Date <small class="text-muted pl-0">/ Pilih Tanggal / 日付を選択</small></label>
@@ -57,7 +57,7 @@
                             <small id="emailHelp" class="form-text text-muted">Select Date</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Select Time <small class="text-muted pl-0">/ Pilih Waktu / 時間を選択</small></label>
@@ -67,7 +67,7 @@
                             <small id="emailHelp" class="form-text text-muted">Select time</small>
                         </div>
                     </div>
-                    
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Total Guest <small class="text-muted pl-0">/ Jumlah Tamu / 宿泊人数</small></label>
@@ -78,7 +78,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group row">
+{{--                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Select Room <small class="text-muted pl-0">/ Pilih Ruangan / 部屋を選択</small></label>
                         </div>
@@ -87,8 +87,8 @@
                                 <option value="null" selected>-- Select Room --</option>
                             </select>
                         </div>
-                    </div>
-                    
+                    </div> --}}
+
                     <div class="form-group row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">PIC <small class="text-muted pl-0">/ PIC / 担当者</small></label>
@@ -108,7 +108,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Document<small class="text-muted pl-0">/ Dokumen / 資料</small> <span class="text-danger">*PNG</span> </label>
@@ -121,7 +121,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-1">
                         <div class="col-md-4">
                             <label for="inputEmail3" class="col-form-label">Selfie Photo <small class="text-muted pl-0">/ Foto selfie / 自撮り写真</small> <span class="text-danger">*PNG</span> </label>
@@ -133,15 +133,15 @@
                             </div>
                         </div>
                     </div>
-                    
-                    
+
+
                     <div class="row mt-5">
                         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                             <button type="submit" class="btn btn-lg btn-primary"><i class="mdi mdi-near-me pr-3"></i>Submit</button>
                         </div>
                     </div>
                 </form>
-                
+
             </div>
         </div>
     </div>
@@ -188,8 +188,8 @@
         $.ajax({
             url: '/get-pic',
             type: 'GET',
-            data: { 
-                dept: $(this).val() 
+            data: {
+                dept: $(this).val()
             },
             success: function(pic) {
                 $('#pic_id').empty();
@@ -200,12 +200,12 @@
         });
     });
 
-    $('#date').change(function(){
+/*     $('#date').change(function(){
         $.ajax({
             url: '/get-room',
             type: 'GET',
-            data: { 
-                date : $(this).val() 
+            data: {
+                date : $(this).val()
             },
             success: function(room) {
                 console.log(room);
@@ -216,6 +216,6 @@
                 });
             }
         });
-    });
+    }); */
 </script>
 @endpush
